@@ -11,11 +11,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import de.polyfish0.adolightstick.routes.LightStickRoutes
 import de.polyfish0.adolightstick.routes.MainRoute
 import de.polyfish0.adolightstick.routes.setup.LightStickSetup
+import de.polyfish0.adolightstick.routes.setup.RequiredPermissions
 import de.polyfish0.adolightstick.routes.setup.SetupScreen
 import de.polyfish0.adolightstick.ui.theme.AdoLightStickTheme
 
@@ -26,19 +26,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-            val bleScanPermissionState = rememberPermissionState(android.Manifest.permission.BLUETOOTH_SCAN)
-            val bleConnectPermissionState = rememberPermissionState(android.Manifest.permission.BLUETOOTH_CONNECT)
 
             AdoLightStickTheme {
                 Scaffold { innerPadding ->
                     NavHost(
                         navController,
                         startDestination = if (
-                                    locationPermissionState.status == PermissionStatus.Granted &&
-                                    bleScanPermissionState.status == PermissionStatus.Granted &&
-                                    bleConnectPermissionState.status == PermissionStatus.Granted
-                                ) LightStickRoutes.MainMenu.name else LightStickRoutes.Setup.name,
+                            rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
+                            ) LightStickRoutes.MainMenu.name else LightStickRoutes.Setup.name,
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable(LightStickRoutes.MainMenu.name) { MainRoute(navController) }

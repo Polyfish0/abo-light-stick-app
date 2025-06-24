@@ -20,67 +20,44 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import de.polyfish0.adolightstick.routes.LightStickRoutes
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SetupScreen(navController: NavController) {
-    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-    val bleScanPermissionState = rememberPermissionState(Manifest.permission.BLUETOOTH_SCAN)
-    val bleConnectPermissionState = rememberPermissionState(Manifest.permission.BLUETOOTH_CONNECT)
+    val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
 
-    if(locationPermissionState.status != PermissionStatus.Granted) {
-        PermissionComposable(locationPermissionState, Icons.Filled.LocationOn, "Please allow the location permission. This is required because the app needs it to find the light stick over Bluetooth.")
-        return
-    }
-
-    if(bleScanPermissionState.status != PermissionStatus.Granted) {
-        PermissionComposable(bleScanPermissionState, Icons.Filled.LocationOn, "Please allow the Bluetooth permission. This is required because the app needs it to find the light stick over Bluetooth.")
-        return
-    }
-
-    if(bleConnectPermissionState.status != PermissionStatus.Granted) {
-        PermissionComposable(bleConnectPermissionState, Icons.Filled.LocationOn, "Please allow the second Bluetooth permission. This is required because the app needs it to find the light stick over Bluetooth.")
-        return
-    }
-
-    navController.navigate(LightStickRoutes.LightStickSetup.name)
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun PermissionComposable(
-    permission: PermissionState,
-    image: ImageVector,
-    text: String
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = image,
-                    contentDescription = "",
-                    modifier = Modifier.size(64.dp)
-                )
-            }
-            Row {
-                Text(text)
-            }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { permission.launchPermissionRequest() }
-            ) {
-                Text("Request Permission")
+    if(requiredPermissions.allPermissionsGranted) {
+        navController.navigate(LightStickRoutes.MainMenu.name)
+    }else {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = "",
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
+                Row {
+                    Text("Please allow the following permissions. They are required because android requires them so that the app is able to scan for the light stick over Bluetooth.")
+                }
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        requiredPermissions.launchMultiplePermissionRequest()
+                    }
+                ) {
+                    Text("Request Permission")
+                }
             }
         }
     }
