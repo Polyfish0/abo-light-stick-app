@@ -1,16 +1,14 @@
 package de.polyfish0.adolightstick.routes
 
-import android.content.Intent
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import androidx.compose.ui.graphics.Color
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import de.polyfish0.adolightstick.service.BLEService
+import de.polyfish0.adolightstick.composables.DonutIndicator
+import de.polyfish0.adolightstick.routes.setup.LightStickSetupViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MainRoute(navController: NavController) {
-    Text("Main Route")
-    LocalContext.current.startService(Intent(LocalContext.current, BLEService::class.java))
+    DonutIndicator(Color(0, 255, 0))
 }
