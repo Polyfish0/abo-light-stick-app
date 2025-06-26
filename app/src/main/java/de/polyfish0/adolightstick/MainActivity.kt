@@ -1,5 +1,6 @@
 package de.polyfish0.adolightstick
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,7 @@ import de.polyfish0.adolightstick.routes.setup.SetupScreen
 import de.polyfish0.adolightstick.ui.theme.AdoLightStickTheme
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("MissingPermission")
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
                         navController,
                         startDestination = if (
                             rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
-                            ) LightStickRoutes.MainMenu.name else LightStickRoutes.Setup.name,
+                            ) LightStickRoutes.LightStickSetup.name else LightStickRoutes.Setup.name,
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable(LightStickRoutes.MainMenu.name) { MainRoute(navController) }
