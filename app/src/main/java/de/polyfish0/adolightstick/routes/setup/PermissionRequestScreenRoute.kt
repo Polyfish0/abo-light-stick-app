@@ -1,10 +1,10 @@
 package de.polyfish0.adolightstick.routes.setup
 
-import android.Manifest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,47 +16,49 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import de.polyfish0.adolightstick.R
 import de.polyfish0.adolightstick.routes.LightStickRoutes
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SetupScreen(navController: NavController) {
+fun PermissionRequestScreen(navController: NavController) {
     val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
 
     if(requiredPermissions.allPermissionsGranted) {
-        navController.navigate(LightStickRoutes.MainMenu.name)
+        navController.navigate(LightStickRoutes.MainMenu)
     }else {
         Box(
-            modifier = Modifier
+            modifier = Modifier.Companion
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
             Column {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.Companion.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.LocationOn,
                         contentDescription = "",
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier.Companion.size(64.dp)
                     )
                 }
                 Row {
-                    Text("Please allow the following permissions. They are required because android requires them so that the app is able to scan for the light stick over Bluetooth.")
+                    Text(stringResource(R.string.allow_permissions))
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 Button(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.Companion.fillMaxWidth(),
                     onClick = {
                         requiredPermissions.launchMultiplePermissionRequest()
                     }
                 ) {
-                    Text("Request Permission")
+                    Text(stringResource(R.string.request_permission))
                 }
             }
         }

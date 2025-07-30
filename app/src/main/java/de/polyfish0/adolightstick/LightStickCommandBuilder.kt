@@ -4,7 +4,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 object LightStickCommandBuilder {
-    val cipher = Cipher.getInstance("AES/ECB/NoPadding")
+    val cipher: Cipher = Cipher.getInstance("AES/ECB/NoPadding")
 
     init {
         cipher.init(
@@ -19,9 +19,9 @@ object LightStickCommandBuilder {
     }
 
     fun changeColor(r: Int, g: Int, b: Int, brightness: Int): ByteArray {
-        val red = r * (brightness / 100)
-        val green = g * (brightness / 100)
-        val blue = b * (brightness / 100)
+        val red = (r * (brightness / 100.0)).toInt().coerceIn(0, 255)
+        val green = (g * (brightness / 100.0)).toInt().coerceIn(0, 255)
+        val blue = (b * (brightness / 100.0)).toInt().coerceIn(0, 255)
 
         return cipher.doFinal(byteArrayOf(
             0x82.toByte(),

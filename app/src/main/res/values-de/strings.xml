@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ado Light Stick</string>
+    <string name="searching_for_the_ado_hibana_light_stick">Der Ado Hibana Lightstick wird gesucht...</string>
+    <string name="waiting_for_the_bluetooth_service_to_finish_starting">Warten auf den Start des Bluetooth-Dienstes...</string>
+    <string name="allow_permissions">Bitte erlaube die folgenden Berechtigungen. Sie sind erforderlich, da Android sie verlangt, damit die App den Lightstick per Bluetooth finden kann.</string>
+    <string name="request_permission">Berechtigung anfordern</string>
+    <string name="setup_colors_matching">Wenn die Farben auf dem Bildschirm mit denen deines Lightsticks übereinstimmen, ist das dein Stick. Wenn nicht, tipp unten auf den Button, um den nächsten in der Nähe zu prüfen. Sollte das Pairing bei deinem Stick aus sein, aktiviere es bitte wieder, bevor du weitermachst.</string>
+    <string name="search_for_the_next_one">Nach dem nächsten Light Stick suchen</string>
+    <string name="correct_one">Das ist der richtige Light Stick</string>
+    <string name="reset_device_blacklist">Lösche die Sperrliste von Geräten</string>
+    <string name="searching_for_stored_light_stick">Suche nach gespeichertem Ado Light Stick</string>
+    <string name="forget_light_stick">Gespeicherten Light Stick löschen</string>
+    <string name="connect_to_light_stick">Verbindung mit Light Stick aufbauen</string>
+</resources>

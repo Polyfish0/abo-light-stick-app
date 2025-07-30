@@ -15,12 +15,13 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import de.polyfish0.adolightstick.LightStickCommandBuilder
+import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.LinkedList
@@ -29,13 +30,18 @@ import java.util.UUID
 class BLEService: Service() {
     private val binder = LocalBinder()
     private val packageQueue = LinkedList<ByteArray>()
+    private val deviceBlacklist = HashSet<String>()
     private var isTransmitting = false
     private var lightStickService: BluetoothGattService? = null
-    private var lightStickCharacteristic: BluetoothGattCharacteristic? = null
     private var lightStickGatt: BluetoothGatt? = null
+    private var lightStickCharacteristic: BluetoothGattCharacteristic? = null
+    private var deviceMacFilter: String? = null
 
     private val _device = MutableStateFlow<BluetoothDevice?>(null)
     val device: StateFlow<BluetoothDevice?> = _device
+
+    private val _deviceReady = MutableStateFlow(false)
+    val deviceReady: StateFlow<Boolean> = _deviceReady
 
     private val bluetoothAdapter: BluetoothAdapter by lazy {
         (application.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
@@ -49,6 +55,12 @@ class BLEService: Service() {
                 return
 
             if(!(result.device.name.equals("Ado Light Stick")))
+                return
+
+            if(deviceBlacklist.contains(result.device.address))
+                return
+
+            if(deviceMacFilter != null && result.device.address != deviceMacFilter)
                 return
 
             // Based on real-world tests, -60 dBm seems to be a reliable threshold
@@ -102,6 +114,7 @@ class BLEService: Service() {
                 lightStickGatt = null
                 lightStickService = null
                 lightStickCharacteristic = null
+                _deviceReady.value = false
             }
         }
 
@@ -109,8 +122,7 @@ class BLEService: Service() {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             lightStickService = gatt?.getService(UUID.fromString("00000000-0000-1000-8000-00805f9b34fb"))
             lightStickCharacteristic = lightStickService?.getCharacteristic(UUID.fromString("00000000-0000-1000-8000-00805f9b34fb"))
-
-            addPackageToSendQueue(LightStickCommandBuilder.changeColor(0, 255, 0, 100))
+            _deviceReady.value = true
         }
 
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -132,7 +144,6 @@ class BLEService: Service() {
     fun sendNextPackage() {
         if(lightStickService == null || lightStickCharacteristic == null) {
             throw RuntimeException("LightStickService or Characteristic is null")
-            return
         }
 
         isTransmitting = true
@@ -152,11 +163,6 @@ class BLEService: Service() {
             sendNextPackage()
     }
 
-    fun getRemoteDeviceByAddress(address: String) {
-        Log.d("BLEService", "Connecting to BLE Device: $address")
-        _device.value = bluetoothAdapter.getRemoteDevice(address)
-    }
-
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connectToGatt() {
         Log.d("BLEService", "Connecting to GATT server")
@@ -166,7 +172,9 @@ class BLEService: Service() {
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun disconnect() {
         Log.d("BLEService", "Disconnect from GATT server")
-        lightStickGatt.disconnect()
+        packageQueue.clear()
+        _device.value = null
+        lightStickGatt?.disconnect()
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
@@ -181,12 +189,29 @@ class BLEService: Service() {
         scanner.stopScan(scanCallback)
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
+    fun blacklistDevice() {
+        if(_device.value == null)
+            return
+
+        deviceBlacklist.add(_device.value!!.address)
+    }
+
+    fun clearBlacklist() {
+        deviceBlacklist.clear()
+    }
+
+    fun getRemoteDeviceByAddress(address: String) {
+        Log.d("BLEService", "Connecting to BLE Device: $address")
+        _device.value = bluetoothAdapter.getRemoteDevice(address)
+    }
+
+    fun setDeviceMacFilter(address: String?) {
+        deviceMacFilter = address
+    }
+
     inner class LocalBinder: Binder() {
         fun getService(): BLEService = this@BLEService
-    }
-    
-    override fun onCreate() {
-        super.onCreate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -194,6 +219,14 @@ class BLEService: Service() {
     }
 
     override fun onDestroy() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            disconnect()
+        }
+
         super.onDestroy()
     }
 

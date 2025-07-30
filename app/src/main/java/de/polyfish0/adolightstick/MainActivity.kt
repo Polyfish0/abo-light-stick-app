@@ -1,7 +1,13 @@
 package de.polyfish0.adolightstick
 
 import android.annotation.SuppressLint
+import android.app.Application
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,10 +23,17 @@ import de.polyfish0.adolightstick.routes.LightStickRoutes
 import de.polyfish0.adolightstick.routes.MainRoute
 import de.polyfish0.adolightstick.routes.setup.LightStickSetup
 import de.polyfish0.adolightstick.routes.setup.RequiredPermissions
-import de.polyfish0.adolightstick.routes.setup.SetupScreen
+import de.polyfish0.adolightstick.routes.setup.PermissionRequestScreen
+import de.polyfish0.adolightstick.service.BLEService
 import de.polyfish0.adolightstick.ui.theme.AdoLightStickTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class MainActivity : ComponentActivity() {
+    private val _bleServiceReady = MutableStateFlow(false)
+    private val bleServiceReady: StateFlow<Boolean> = _bleServiceReady
+    private var bleService: BLEService? = null
+
     @SuppressLint("MissingPermission")
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,12 +48,12 @@ class MainActivity : ComponentActivity() {
                         navController,
                         startDestination = if (
                             rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
-                            ) LightStickRoutes.LightStickSetup.name else LightStickRoutes.Setup.name,
+                            ) LightStickRoutes.LightStickSetup else LightStickRoutes.PermissionRequestScreen,
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        composable(LightStickRoutes.MainMenu.name) { MainRoute(navController) }
-                        composable(LightStickRoutes.LightStickSetup.name) { LightStickSetup(navController) }
-                        composable(LightStickRoutes.Setup.name) { SetupScreen(navController) }
+                        composable(LightStickRoutes.MainMenu) { MainRoute(navController) }
+                        composable(LightStickRoutes.LightStickSetup) { LightStickSetup(navController) }
+                        composable(LightStickRoutes.PermissionRequestScreen) { PermissionRequestScreen(navController) }
                     }
                 }
             }
