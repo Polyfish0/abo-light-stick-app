@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
@@ -23,7 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class LightStickSetupViewModel(
-    application: Application,
+    application: Application
 ) : AndroidViewModel(application) {
     val device: StateFlow<BluetoothDevice?> get() = bleService?.device ?: MutableStateFlow(null)
     val deviceReady: StateFlow<Boolean> get() = bleService?.deviceReady ?: MutableStateFlow(false)
@@ -74,9 +73,9 @@ class LightStickSetupViewModel(
     fun changeColor(color: Color, brightness: Int = 100) {
         bleService?.addPackageToSendQueue(
             LightStickCommandBuilder.changeColor(
-                color.red.toInt() * 255,
-                color.green.toInt() * 255,
-                color.blue.toInt() * 255,
+                (color.red * 255).toInt(),
+                (color.green * 255).toInt(),
+                (color.blue * 255).toInt(),
                 brightness.coerceIn(0, 100)
             )
         )

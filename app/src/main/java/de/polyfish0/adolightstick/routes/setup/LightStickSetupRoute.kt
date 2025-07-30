@@ -80,7 +80,9 @@ fun LightStickSetup(navController: NavController) {
         if(lightStickMac?.isNotEmpty() == true) {
             navController.navigate(LightStickRoutes.MainMenu) {
                 launchSingleTop = true
-                popUpTo(navController.graph.findStartDestination().route!!)
+                popUpTo(navController.graph.findStartDestination().route!!) {
+                    inclusive = true
+                }
             }
         }else {
             LightStickFound(viewModel)
@@ -118,7 +120,6 @@ fun LightStickFound(viewModel: LightStickSetupViewModel) {
             } while (newColor == currentColor)
 
             currentColor = newColor
-
             viewModel.changeColor(currentColor)
         }
     }
@@ -189,6 +190,8 @@ fun SearchingLightStick(viewModel: LightStickSetupViewModel, savedLightStick: Bo
             tint = MaterialTheme.colorScheme.primary
         )
 
+        Spacer(modifier = Modifier.weight(1f))
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -204,6 +207,8 @@ fun SearchingLightStick(viewModel: LightStickSetupViewModel, savedLightStick: Bo
                 modifier = Modifier.size(48.dp)
             )
         }
+
+        Spacer(modifier = Modifier.weight(1f))
 
         if(showForget) {
             Column(

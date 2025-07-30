@@ -1,13 +1,7 @@
 package de.polyfish0.adolightstick
 
 import android.annotation.SuppressLint
-import android.app.Application
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -24,10 +18,7 @@ import de.polyfish0.adolightstick.routes.MainRoute
 import de.polyfish0.adolightstick.routes.setup.LightStickSetup
 import de.polyfish0.adolightstick.routes.setup.RequiredPermissions
 import de.polyfish0.adolightstick.routes.setup.PermissionRequestScreen
-import de.polyfish0.adolightstick.service.BLEService
 import de.polyfish0.adolightstick.ui.theme.AdoLightStickTheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
@@ -37,17 +28,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
+            navController.enableOnBackPressed(false)
 
             AdoLightStickTheme {
-                NavHost(
-                    navController,
-                    startDestination = if (
-                        rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
-                    ) LightStickRoutes.LightStickSetup else LightStickRoutes.PermissionRequestScreen
-                ) {
-                    composable(LightStickRoutes.MainMenu) { MainRoute(navController) }
-                    composable(LightStickRoutes.LightStickSetup) { LightStickSetup(navController) }
-                    composable(LightStickRoutes.PermissionRequestScreen) { PermissionRequestScreen(navController) }
+                Scaffold { innerPadding ->
+                    NavHost(
+                        navController,
+                        startDestination = if (
+                            rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
+                        ) LightStickRoutes.LightStickSetup else LightStickRoutes.PermissionRequestScreen,
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+                        composable(LightStickRoutes.MainMenu) { MainRoute(navController) }
+                        composable(LightStickRoutes.LightStickSetup) { LightStickSetup(navController) }
+                        composable(LightStickRoutes.PermissionRequestScreen) { PermissionRequestScreen(navController) }
+                    }
                 }
             }
         }
