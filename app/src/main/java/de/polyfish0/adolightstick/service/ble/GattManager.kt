@@ -118,7 +118,7 @@ class GattManager(
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connect(device: BluetoothDevice) {
         Log.d("BLEService", "Connecting to GATT server")
-        device.connectGatt(context, false, this)
+        gatt = device.connectGatt(context, false, this)
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
