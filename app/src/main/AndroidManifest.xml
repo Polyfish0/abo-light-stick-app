@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".service.BLEService"
+            android:name=".service.ble.BLEService"
             android:exported="false"
             android:foregroundServiceType="location|connectedDevice" />
     </application>

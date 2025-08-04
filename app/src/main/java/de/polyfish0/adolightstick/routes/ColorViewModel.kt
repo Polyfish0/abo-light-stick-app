@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import de.polyfish0.adolightstick.LightStickCommandBuilder
-import de.polyfish0.adolightstick.service.BLEService
+import de.polyfish0.adolightstick.service.ble.BLEService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -36,7 +36,7 @@ class ColorViewModel(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun changeColor(color: Color, brightness: Int = 100) {
-        bleService?.addPackageToSendQueue(
+        bleService?.sendData(
             LightStickCommandBuilder.changeColor(
                 (color.red * 255).toInt(),
                 (color.green * 255).toInt(),
