@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import de.polyfish0.adolightstick.LightStickCommandBuilder
-import de.polyfish0.adolightstick.service.BLEService
+import de.polyfish0.adolightstick.service.ble.BLEService
 import de.polyfish0.adolightstick.utils.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -57,7 +57,7 @@ class LightStickSetupViewModel(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connectToGatt() {
-        bleService?.connectToGatt()
+        bleService?.connect()
     }
 
     fun connectToStoredLightStick() {
@@ -71,7 +71,7 @@ class LightStickSetupViewModel(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun changeColor(color: Color, brightness: Int = 100) {
-        bleService?.addPackageToSendQueue(
+        bleService?.sendData(
             LightStickCommandBuilder.changeColor(
                 (color.red * 255).toInt(),
                 (color.green * 255).toInt(),

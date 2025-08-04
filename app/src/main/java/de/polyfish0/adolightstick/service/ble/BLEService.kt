@@ -1,4 +1,4 @@
-package de.polyfish0.adolightstick.service
+package de.polyfish0.adolightstick.service.ble
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -29,12 +29,8 @@ import java.util.UUID
 
 class BLEService: Service() {
     private val binder = LocalBinder()
-    private val packageQueue = LinkedList<ByteArray>()
+    private lateinit var gattManager: GattManager
     private val deviceBlacklist = HashSet<String>()
-    private var isTransmitting = false
-    private var lightStickService: BluetoothGattService? = null
-    private var lightStickGatt: BluetoothGatt? = null
-    private var lightStickCharacteristic: BluetoothGattCharacteristic? = null
     private var deviceMacFilter: String? = null
 
     private val _device = MutableStateFlow<BluetoothDevice?>(null)
@@ -75,108 +71,6 @@ class BLEService: Service() {
         }
     }
 
-    private val gattCallback = object : BluetoothGattCallback() {
-        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            if(newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d("BLEService", "Gatt connected")
-
-                if(gatt == null) {
-                    Log.d("BLEService", "gatt in onConnectionStateChange is null")
-                    return
-                }
-
-                packageQueue.add(byteArrayOf(
-                    0xD2.toByte(),
-                    0xFC.toByte(),
-                    0x45,
-                    0x6A,
-                    0x57,
-                    0xC9.toByte(),
-                    0x8F.toByte(),
-                    0xD9.toByte(),
-                    0xA3.toByte(),
-                    0x06,
-                    0x8E.toByte(),
-                    0x0F,
-                    0xCA.toByte(),
-                    0x9A.toByte(),
-                    0x91.toByte(),
-                    0xC7.toByte()
-                ))
-
-                lightStickGatt = gatt
-                gatt.discoverServices()
-            }else if(newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d("BLEService", "Gatt disconnected")
-
-                packageQueue.clear()
-                lightStickGatt = null
-                lightStickService = null
-                lightStickCharacteristic = null
-                _deviceReady.value = false
-            }
-        }
-
-        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            lightStickService = gatt?.getService(UUID.fromString("00000000-0000-1000-8000-00805f9b34fb"))
-            lightStickCharacteristic = lightStickService?.getCharacteristic(UUID.fromString("00000000-0000-1000-8000-00805f9b34fb"))
-            _deviceReady.value = true
-        }
-
-        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-        override fun onCharacteristicWrite(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?,
-            status: Int
-        ) {
-
-            if(packageQueue.isNotEmpty()) {
-                sendNextPackage()
-            }else {
-                isTransmitting = false
-            }
-        }
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun sendNextPackage() {
-        if(lightStickService == null || lightStickCharacteristic == null) {
-            throw RuntimeException("LightStickService or Characteristic is null")
-        }
-
-        isTransmitting = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            lightStickGatt?.writeCharacteristic(lightStickCharacteristic!!, packageQueue.pop(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
-        }else {
-            lightStickCharacteristic!!.setValue(packageQueue.pop())
-            lightStickGatt?.writeCharacteristic(lightStickCharacteristic)
-        }
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun addPackageToSendQueue(data: ByteArray) {
-        packageQueue.add(data)
-
-        if(!isTransmitting)
-            sendNextPackage()
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun connectToGatt() {
-        Log.d("BLEService", "Connecting to GATT server")
-        _device.value?.connectGatt(applicationContext, false, gattCallback)
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun disconnect() {
-        Log.d("BLEService", "Disconnect from GATT server")
-        packageQueue.clear()
-        _device.value = null
-        lightStickGatt?.disconnect()
-    }
-
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun startDeviceSearch() {
         Log.d("BLEService", "Start device scan")
@@ -210,6 +104,24 @@ class BLEService: Service() {
         deviceMacFilter = address
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun sendData(data: ByteArray) {
+        gattManager.addPackageToSendQueue(data)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun connect() {
+        if(_device.value == null)
+            throw RuntimeException("Device is null")
+
+        gattManager.connect(_device.value!!)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun disconnect() {
+        gattManager.disconnect()
+    }
+
     inner class LocalBinder: Binder() {
         fun getService(): BLEService = this@BLEService
     }
@@ -218,13 +130,22 @@ class BLEService: Service() {
         return START_STICKY
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        gattManager = GattManager(
+            applicationContext,
+            onReady = { _deviceReady.value = true },
+            onDisconnected = { _deviceReady.value = false }
+        )
+    }
+
     override fun onDestroy() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            disconnect()
+            gattManager.disconnect()
         }
 
         super.onDestroy()
