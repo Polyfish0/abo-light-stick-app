@@ -38,7 +38,8 @@ fun ColorScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ColorPicker(
-            type = ColorPickerType.Circle(showAlphaBar = false)
+            type = ColorPickerType.Circle(showAlphaBar = false),
+
         ) {
             viewModel.updateColor(it)
         }

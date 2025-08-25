@@ -36,13 +36,11 @@ class ColorViewModel(
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun changeColor(color: Color, brightness: Int = 100) {
-        bleService?.sendData(
-            LightStickCommandBuilder.changeColor(
-                (color.red * 255).toInt(),
-                (color.green * 255).toInt(),
-                (color.blue * 255).toInt(),
-                brightness.coerceIn(0, 100)
-            )
+        bleService?.sendColor(
+            (color.red * 255).toInt(),
+            (color.green * 255).toInt(),
+            (color.blue * 255).toInt(),
+            brightness.coerceIn(0, 100)
         )
     }
 

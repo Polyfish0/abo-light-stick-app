@@ -1,6 +1,7 @@
 package de.polyfish0.adolightstick.service.ble
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
@@ -10,6 +11,10 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
+import de.polyfish0.adolightstick.LightStickCommandBuilder
+import de.polyfish0.adolightstick.effects.Effect
+import de.polyfish0.adolightstick.service.ble.EffectManager
+import de.polyfish0.adolightstick.exceptions.EffectInUseException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -17,12 +22,15 @@ class BLEService: Service() {
     private val binder = LocalBinder()
     private lateinit var gattManager: GattManager
     private lateinit var scanner: ScanManager
+    private lateinit var effectManager: EffectManager
 
     private val _device = MutableStateFlow<BluetoothDevice?>(null)
     val device: StateFlow<BluetoothDevice?> = _device
 
     private val _deviceReady = MutableStateFlow(false)
     val deviceReady: StateFlow<Boolean> = _deviceReady
+    private val _currentEffect = MutableStateFlow<Effect?>(null)
+    val currentEffect: StateFlow<Effect?> = _currentEffect
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun startDeviceSearch() {
@@ -55,11 +63,6 @@ class BLEService: Service() {
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun sendData(data: ByteArray) {
-        gattManager.addPackageToSendQueue(data)
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connect() {
         if(_device.value == null)
             throw RuntimeException("Device is null")
@@ -72,6 +75,19 @@ class BLEService: Service() {
         gattManager.disconnect()
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun sendColor(r: Int, g: Int, b: Int, brightness: Int) {
+        if(_currentEffect.value != null)
+            throw EffectInUseException("manual color change is not possible while an effect is running")
+
+        sendColorInternal(r, g, b, brightness)
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private fun sendColorInternal(r: Int, g: Int, b: Int, brightness: Int) {
+        gattManager.addPackageToSendQueue(LightStickCommandBuilder.changeColor(r, g, b, brightness))
+    }
+
     inner class LocalBinder: Binder() {
         fun getService(): BLEService = this@BLEService
     }
@@ -80,6 +96,7 @@ class BLEService: Service() {
         return START_STICKY
     }
 
+    @SuppressLint("MissingPermission")
     override fun onCreate() {
         super.onCreate()
         gattManager = GattManager(
@@ -90,6 +107,10 @@ class BLEService: Service() {
         scanner = ScanManager(
             application,
             onDeviceFound = { _device.value = it }
+        )
+        effectManager = EffectManager(
+            { _currentEffect.value = it },
+            { r, g, b, a -> sendColorInternal(r, g, b, a)}
         )
     }
 
