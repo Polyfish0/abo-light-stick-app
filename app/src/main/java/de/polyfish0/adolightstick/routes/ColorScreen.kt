@@ -5,6 +5,8 @@ import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,13 +17,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.mhssn.colorpicker.ColorPicker
-import io.mhssn.colorpicker.ColorPickerType
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 @OptIn(ExperimentalComposeUiApi::class)
 @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @Composable
 fun ColorScreen() {
+    val colorPickerController = rememberColorPickerController()
     val viewModel: ColorViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory(LocalContext.current.applicationContext as Application)
     )
@@ -37,11 +40,15 @@ fun ColorScreen() {
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ColorPicker(
-            type = ColorPickerType.Circle(showAlphaBar = false),
-
-        ) {
-            viewModel.updateColor(it)
-        }
+        HsvColorPicker(
+            modifier = Modifier.fillMaxWidth()
+                .height(450.dp)
+                .padding(10.dp),
+            controller = colorPickerController,
+            initialColor = viewModel.currentColor.value,
+            onColorChanged = {
+                viewModel.updateColor(it.color)
+            }
+        )
     }
 }
