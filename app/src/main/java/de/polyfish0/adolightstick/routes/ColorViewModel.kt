@@ -12,6 +12,7 @@ import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import de.polyfish0.adolightstick.LightStickCommandBuilder
 import de.polyfish0.adolightstick.service.ble.BLEService
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -42,7 +42,13 @@ fun MainRoute(navController: NavController) {
                     NavigationBarItem(
                         selected = selectedDestination == index,
                         onClick = {
-                            navBarController.navigate(destination.route)
+                            navBarController.navigate(destination.route) {
+                                popUpTo(navBarController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                             selectedDestination = index
                         },
                         icon = {
