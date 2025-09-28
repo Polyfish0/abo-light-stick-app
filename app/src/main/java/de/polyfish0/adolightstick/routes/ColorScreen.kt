@@ -2,12 +2,23 @@ package de.polyfish0.adolightstick.routes
 
 import android.app.Application
 import androidx.annotation.RequiresPermission
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -36,19 +47,41 @@ fun ColorScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 32.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HsvColorPicker(
-            modifier = Modifier.fillMaxWidth()
-                .height(450.dp)
-                .padding(10.dp),
-            controller = colorPickerController,
-            initialColor = viewModel.currentColor.value,
-            onColorChanged = {
-                viewModel.updateColor(it.color)
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())) {
+                repeat(10) {
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "")
+                    }
+                }
             }
+        }
+        HorizontalDivider(modifier = Modifier
+            .padding(8.dp, 0.dp)
+            .height(1.dp)
+            .fillMaxWidth()
         )
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)) {
+            HsvColorPicker(
+                modifier = Modifier.fillMaxWidth()
+                    .height(450.dp)
+                    .padding(10.dp),
+                controller = colorPickerController,
+                initialColor = viewModel.currentColor.value,
+                onColorChanged = {
+                    viewModel.updateColor(it.color)
+                }
+            )
+        }
     }
 }
