@@ -12,4 +12,6 @@
     <string name="searching_for_stored_light_stick">Searching for saved Ado Light Stick</string>
     <string name="forget_light_stick">Forget saved Light Stick</string>
     <string name="connect_to_light_stick">Connect to Light Stick</string>
+    <string name="manually">Manually</string>
+    <string name="rainbow">Rainbow</string>
 </resources>

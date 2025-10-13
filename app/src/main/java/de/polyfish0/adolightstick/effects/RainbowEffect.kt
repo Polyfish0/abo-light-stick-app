@@ -1,6 +1,6 @@
 package de.polyfish0.adolightstick.effects
 
-class RainbowEffect : Effect(0) {
+class RainbowEffect : Effect(10) {
     private var hue = 0f
 
     override fun tick() {
