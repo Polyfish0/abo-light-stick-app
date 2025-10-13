@@ -30,7 +30,7 @@ fun PermissionRequestScreen(navController: NavController) {
     val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
 
     if(requiredPermissions.allPermissionsGranted) {
-        navController.navigate(LightStickRoutes.MainMenu)
+        navController.navigate(LightStickRoutes.LightStickSetup)
     }else {
         Box(
             modifier = Modifier.Companion

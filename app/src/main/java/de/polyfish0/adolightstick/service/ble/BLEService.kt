@@ -29,6 +29,7 @@ class BLEService: Service() {
 
     private val _deviceReady = MutableStateFlow(false)
     val deviceReady: StateFlow<Boolean> = _deviceReady
+
     private val _currentEffect = MutableStateFlow<Effect?>(null)
     val currentEffect: StateFlow<Effect?> = _currentEffect
 
@@ -86,6 +87,15 @@ class BLEService: Service() {
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun sendColorInternal(r: Int, g: Int, b: Int, brightness: Int) {
         gattManager.addPackageToSendQueue(LightStickCommandBuilder.changeColor(r, g, b, brightness))
+    }
+
+    fun updateEffect(effect: Effect?) {
+        _currentEffect.value = effect
+
+        if(_currentEffect.value != null)
+            effectManager.start(_currentEffect.value!!)
+        else
+            effectManager.stop()
     }
 
     inner class LocalBinder: Binder() {

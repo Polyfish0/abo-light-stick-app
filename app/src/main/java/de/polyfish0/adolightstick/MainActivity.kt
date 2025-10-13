@@ -1,6 +1,7 @@
 package de.polyfish0.adolightstick
 
 import android.annotation.SuppressLint
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,13 +31,14 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             navController.enableOnBackPressed(false)
 
+            val defaultDestination = if (rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
+            ) LightStickRoutes.LightStickSetup else LightStickRoutes.PermissionRequestScreen
+
             AdoLightStickTheme {
                 Scaffold { innerPadding ->
                     NavHost(
                         navController,
-                        startDestination = if (
-                            rememberMultiplePermissionsState(RequiredPermissions.permissions).allPermissionsGranted
-                        ) LightStickRoutes.LightStickSetup else LightStickRoutes.PermissionRequestScreen,
+                        startDestination = defaultDestination,
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable(LightStickRoutes.MainMenu) { MainRoute(navController) }
