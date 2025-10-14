@@ -1,4 +1,4 @@
-package de.polyfish0.adolightstick
+package de.polyfish0.adolightstick.utils
 
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
@@ -9,12 +9,14 @@ object LightStickCommandBuilder {
     init {
         cipher.init(
             Cipher.ENCRYPT_MODE,
-            SecretKeySpec(byteArrayOf(
-                0x21.toByte(), 0x74.toByte(), 0x51.toByte(), 0x64.toByte(),
-                0x73.toByte(), 0xA1.toByte(), 0xF5.toByte(), 0x35.toByte(),
-                0x10.toByte(), 0x04.toByte(), 0xA1.toByte(), 0x3E.toByte(),
-                0x6B.toByte(), 0x71.toByte(), 0x6A.toByte(), 0xB9.toByte()
-            ), "AES")
+            SecretKeySpec(
+                byteArrayOf(
+                    0x21.toByte(), 0x74.toByte(), 0x51.toByte(), 0x64.toByte(),
+                    0x73.toByte(), 0xA1.toByte(), 0xF5.toByte(), 0x35.toByte(),
+                    0x10.toByte(), 0x04.toByte(), 0xA1.toByte(), 0x3E.toByte(),
+                    0x6B.toByte(), 0x71.toByte(), 0x6A.toByte(), 0xB9.toByte()
+                ), "AES"
+            )
         )
     }
 

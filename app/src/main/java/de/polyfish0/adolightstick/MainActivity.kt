@@ -1,7 +1,6 @@
 package de.polyfish0.adolightstick
 
 import android.annotation.SuppressLint
-import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,10 +13,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import de.polyfish0.adolightstick.routes.LightStickRoutes
+import de.polyfish0.adolightstick.utils.LightStickRoutes
 import de.polyfish0.adolightstick.routes.MainRoute
 import de.polyfish0.adolightstick.routes.setup.LightStickSetup
-import de.polyfish0.adolightstick.routes.setup.RequiredPermissions
+import de.polyfish0.adolightstick.utils.RequiredPermissions
 import de.polyfish0.adolightstick.routes.setup.PermissionRequestScreen
 import de.polyfish0.adolightstick.ui.theme.AdoLightStickTheme
 

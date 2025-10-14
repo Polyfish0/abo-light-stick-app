@@ -22,7 +22,8 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import de.polyfish0.adolightstick.R
-import de.polyfish0.adolightstick.routes.LightStickRoutes
+import de.polyfish0.adolightstick.utils.LightStickRoutes
+import de.polyfish0.adolightstick.utils.RequiredPermissions
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

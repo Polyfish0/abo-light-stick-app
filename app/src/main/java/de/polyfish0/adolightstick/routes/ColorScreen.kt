@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
@@ -42,6 +40,7 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import de.polyfish0.adolightstick.R
 import de.polyfish0.adolightstick.effects.Effect
 import de.polyfish0.adolightstick.effects.RainbowEffect
+import de.polyfish0.adolightstick.viewmodel.ColorViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)

@@ -1,4 +1,4 @@
-package de.polyfish0.adolightstick.routes
+package de.polyfish0.adolightstick.utils
 
 object LightStickRoutes {
     const val PermissionRequestScreen = "permission_request"

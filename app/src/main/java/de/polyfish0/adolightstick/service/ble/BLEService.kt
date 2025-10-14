@@ -11,7 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
-import de.polyfish0.adolightstick.LightStickCommandBuilder
+import de.polyfish0.adolightstick.utils.LightStickCommandBuilder
 import de.polyfish0.adolightstick.effects.Effect
 import de.polyfish0.adolightstick.service.ble.EffectManager
 import de.polyfish0.adolightstick.exceptions.EffectInUseException

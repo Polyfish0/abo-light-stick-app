@@ -1,4 +1,4 @@
-package de.polyfish0.adolightstick.routes.setup
+package de.polyfish0.adolightstick.viewmodel
 
 import android.Manifest
 import android.app.Application
@@ -12,7 +12,6 @@ import androidx.annotation.RequiresPermission
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import de.polyfish0.adolightstick.LightStickCommandBuilder
 import de.polyfish0.adolightstick.service.ble.BLEService
 import de.polyfish0.adolightstick.utils.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow

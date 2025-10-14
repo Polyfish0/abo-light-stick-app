@@ -38,7 +38,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import de.polyfish0.adolightstick.R
 import de.polyfish0.adolightstick.composables.DonutIndicator
-import de.polyfish0.adolightstick.routes.LightStickRoutes
+import de.polyfish0.adolightstick.utils.LightStickRoutes
+import de.polyfish0.adolightstick.viewmodel.LightStickSetupViewModel
 import kotlinx.coroutines.delay
 
 @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN])

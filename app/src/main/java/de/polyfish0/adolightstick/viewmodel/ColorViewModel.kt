@@ -1,4 +1,4 @@
-package de.polyfish0.adolightstick.routes
+package de.polyfish0.adolightstick.viewmodel
 
 import android.Manifest
 import android.annotation.SuppressLint
