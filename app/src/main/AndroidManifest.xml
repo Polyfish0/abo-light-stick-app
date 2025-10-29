@@ -46,5 +46,9 @@
             android:name=".service.ble.BLEService"
             android:exported="false"
             android:foregroundServiceType="location|connectedDevice" />
+        <service
+            android:name=".service.wifidirect.WifiDirectService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
     </application>
 </manifest>

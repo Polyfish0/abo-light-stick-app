@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -86,6 +87,7 @@ fun AppNavHost(
                 when (destination) {
                     Destination.COLORS -> ColorScreen()
                     Destination.SETTINGS -> AppSettingsScreen()
+                    Destination.GROUPSYNC -> GroupScreen()
                 }
             }
         }
@@ -100,4 +102,5 @@ enum class Destination(
 ) {
     COLORS("colors", "Colors", Icons.Default.Home, "Colors"),
     SETTINGS("settings", "Settings", Icons.Default.Settings, "Settings"),
+    GROUPSYNC("group_sync", "Group Sync", Icons.Default.Refresh, "Group Sync")
 }
