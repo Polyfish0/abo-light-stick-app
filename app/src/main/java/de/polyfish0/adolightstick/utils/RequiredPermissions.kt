@@ -7,6 +7,6 @@ object RequiredPermissions {
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.BLUETOOTH_CONNECT,
-        Manifest.permission.NEARBY_WIFI_DEVICES
+        Manifest.permission.NEARBY_WIFI_DEVICES,
     )
 }

@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold { innerPadding ->
                     NavHost(
                         navController,
-                        startDestination = LightStickRoutes.MainMenu,
+                        startDestination = defaultDestination,
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable(LightStickRoutes.MainMenu) { MainRoute(navController) }

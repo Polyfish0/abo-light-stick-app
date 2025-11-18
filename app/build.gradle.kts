@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.colorpicker)
     implementation(libs.play.services.nearby)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

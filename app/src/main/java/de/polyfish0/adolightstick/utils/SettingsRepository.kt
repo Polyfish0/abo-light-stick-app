@@ -11,9 +11,11 @@ class SettingsRepository(context: Context) {
 
     companion object {
         private val LIGHT_STICK_MAC = stringPreferencesKey("lightStickMacAddress")
+        private val USERNAME = stringPreferencesKey("username")
     }
 
     val lightStickMac: Flow<String> = dataStore.data.map { prefs -> prefs[LIGHT_STICK_MAC] ?: "" }
+    val username: Flow<String> = dataStore.data.map { prefs -> prefs[USERNAME] ?: "Ado" }
 
     suspend fun setLightStickMac(mac: String) {
         dataStore.edit { prefs ->
@@ -24,6 +26,12 @@ class SettingsRepository(context: Context) {
     suspend fun deleteLightStickMac() {
         dataStore.edit { prefs ->
             prefs.remove(LIGHT_STICK_MAC)
+        }
+    }
+
+    suspend fun setUsername(username: String) {
+        dataStore.edit { prefs ->
+            prefs[USERNAME] = username
         }
     }
 }
