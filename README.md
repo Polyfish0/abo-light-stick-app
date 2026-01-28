@@ -21,6 +21,10 @@ Back home in Germany, I started reverse-engineering the protocol to build an app
 * **Offline First:** No internet required.
 * **Privacy:** No tracking, no data collection. Just a tool that does its job.
 
+### Known Bugs
+* **No device connection check:** Right now the app does not check if a Light Stick is connected or not. If you e.g. turn off your Light Stick while using the app, it will crash.
+* **Not perfect UI descriptions:** Some UI elements are not really good describing what happens (mainly the connection screen after you paired your Light Stick).
+
 ### App Capabilities
 * **Smart Pairing:** The app remembers *your* specific Light Stick. In a venue with thousands of Bluetooth devices, this ensures you connect to *your* stick instantly.
 * **Manual Control:** Color picking and brightness control.
@@ -36,9 +40,26 @@ Back home in Germany, I started reverse-engineering the protocol to build an app
 * [ ] **Song Maps:** Presets matching specific Ado songs.
 * [ ] **Groups:** A feature for group leaders to control multiple sticks (sync colors/effects) – perfect for fan groups at concerts. This feature will not require any internet connection. The device needs to support WiFi - Direct.
 
+## How to Install (APK)
+
+Since this app is not (yet) available on the Google Play Store, you need to install it manually ("sideloading").
+
+1.  **Download:** Get the latest `.apk` file from the [Releases](https://github.com/Polyfish0/abo-light-stick-app/releases) section.
+2.  **Open:** Tap on the downloaded file in your notification center or file manager.
+3.  **Grant Permission:**
+    * Android will likely show a warning: *"For security reasons, your phone is currently not allowed to install unknown apps from this source."*
+    * Tap on **Settings**.
+    * Toggle on **"Allow from this source"**.
+4.  **Install:** Go back and tap **Install**.
+5.  **Done:** The app is now ready for the next concert!
+
+> **Note:** Your browser might warn you that the file "might be harmful". This is a standard Android warning for any app downloaded outside the Play Store. You can safely ignore it and tap "Download anyway".
+
 ## Disclaimer
 
 This is an unofficial fan project. I am not affiliated with Ado, her management, or the official merchandise manufacturers. Use at your own risk.
+
+Also notice that this app is still not finished! I would not even consider this a beta. I still provide the APK files to get feedback from users.
 
 ## License
 
