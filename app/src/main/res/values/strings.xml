@@ -14,4 +14,5 @@
     <string name="connect_to_light_stick">Connect to Light Stick</string>
     <string name="manually">Manually</string>
     <string name="rainbow">Rainbow</string>
+    <string name="play_circle_description">Play</string>
 </resources>
