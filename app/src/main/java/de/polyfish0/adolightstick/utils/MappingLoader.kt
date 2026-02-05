@@ -1,7 +1,7 @@
 package de.polyfish0.adolightstick.utils
 
-import android.os.Debug
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 
 fun assetsListTrimmer(list: Array<String>): Array<String> {
     list.forEach {
@@ -11,4 +11,11 @@ fun assetsListTrimmer(list: Array<String>): Array<String> {
 
     Log.i("DominantIntegration", list.size.toString())
     return list
+}
+
+fun loadMapping(filename: String) : Array<Color> {
+    // asset open "Mappings/" + filename
+    // Convert to color array
+    // Manage timing
+    return arrayOf(Color.Red, Color.Blue)
 }

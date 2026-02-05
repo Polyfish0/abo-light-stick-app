@@ -2,6 +2,7 @@ package de.polyfish0.adolightstick.routes.setup
 
 import android.util.Log
 import android.widget.NumberPicker
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,6 +94,10 @@ fun PermissionRequestScreen(navController: NavController) {
                             contentDescription = stringResource(id = R.string.play_circle_description)
                         )
                     }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Canvas(modifier = Modifier.fillMaxWidth()) {
+                    drawCircle(Color.Blue, radius = 100.dp.toPx())
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
