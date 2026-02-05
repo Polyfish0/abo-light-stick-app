@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,13 +30,16 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import de.polyfish0.adolightstick.R
 import de.polyfish0.adolightstick.routes.LightStickRoutes
+import de.polyfish0.adolightstick.utils.assetsListTrimmer
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PermissionRequestScreen(navController: NavController) {
     val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
-    val songs = arrayOf("Magic", "Kira Kira", "Kick Back")
-    var selectedItem = "Placeholder"
+    //val songs = arrayOf("Magic", "Kira Kira", "Kick Back")
+    val songs : Array<String> = assetsListTrimmer( LocalContext.current.assets.list("Mappings")!!)
+    //val file = LocalContext.current.assets.open("Mappings/Magic").toString()
+    var selectedItem = "Magic"
 
     if(requiredPermissions.allPermissionsGranted) {
         navController.navigate(LightStickRoutes.LightStickSetup)
@@ -70,7 +74,6 @@ fun PermissionRequestScreen(navController: NavController) {
                                 displayedValues = songs
                                 setOnValueChangedListener { _, _, newVal ->
                                     selectedItem = songs[newVal]
-                                    //Log.d("DominantIntegration", selectedItem)
                                 }
                             }
                         },
