@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.navigation.compose)
     implementation(libs.colorpicker)
+    implementation(libs.androidx.compose.animation.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
