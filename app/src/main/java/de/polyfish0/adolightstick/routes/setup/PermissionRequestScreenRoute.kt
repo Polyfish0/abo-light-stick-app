@@ -3,8 +3,6 @@ package de.polyfish0.adolightstick.routes.setup
 import android.util.Log
 import android.widget.NumberPicker
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,7 +43,6 @@ import de.polyfish0.adolightstick.utils.loadMapping
 @Composable
 fun PermissionRequestScreen(navController: NavController) {
     val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
-    //val songs = arrayOf("Magic", "Kira Kira", "Kick Back")
     val songs : Array<String> = assetsListTrimmer( LocalContext.current.assets.list("Mappings")!!)
     //val file = LocalContext.current.assets.open("Mappings/Magic").toString()
     val frames = loadMapping("Dummy")
