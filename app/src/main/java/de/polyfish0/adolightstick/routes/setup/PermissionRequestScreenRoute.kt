@@ -42,10 +42,10 @@ import de.polyfish0.adolightstick.utils.loadMapping
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PermissionRequestScreen(navController: NavController) {
+    val ctx = LocalContext.current
     val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
-    val songs : Array<String> = assetsListTrimmer( LocalContext.current.assets.list("Mappings")!!)
-    //val file = LocalContext.current.assets.open("Mappings/Magic").toString()
-    val frames = loadMapping("Dummy")
+    val songs : Array<String> = assetsListTrimmer( LocalContext.current.assets.list("Mappings")!!) // Useless func ?
+    var frames = loadMapping(ctx.assets.open("Mappings/Magic")) // Default
     var changeColor: Boolean by remember { mutableStateOf(false) }
     val animatedColor: Color by animateColorAsState(targetValue = if (changeColor) Color.Black else Color.White, animationSpec = frames)
     var selectedItem = "Magic"
@@ -95,6 +95,7 @@ fun PermissionRequestScreen(navController: NavController) {
                     Button(
                         onClick = {
                             Log.d("DominantIntegration", selectedItem)
+                            frames = loadMapping(ctx.assets.open("Mappings/$selectedItem"))
                             changeColor = !changeColor
                         }
                     ) {
