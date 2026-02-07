@@ -8,6 +8,7 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 
+//Merely a debug function, will be removed in final version
 fun assetsListTrimmer(list: Array<String>): Array<String> {
     list.forEach {
         //println(it)
@@ -19,11 +20,8 @@ fun assetsListTrimmer(list: Array<String>): Array<String> {
 }
 
 fun loadMapping(file: InputStream) : KeyframesSpec<Color> {//Array<Color> {
-    // asset open "Mappings/" + filename
-    // Convert to color array
-    // Manage timing // Animation * AsState ?
+    val pacingNumber = 42 // (in millis) Determine how fast the animation will play (must be as close as possible as the clip duration)
     val reader = BufferedReader(InputStreamReader(file))
-
     val input: Sequence<String> = generateSequence { reader.readLine() }
     val trimmingRegex = "[^0-9,]".toRegex()
     val numberRegex = "[0-9]".toRegex()
@@ -31,16 +29,12 @@ fun loadMapping(file: InputStream) : KeyframesSpec<Color> {//Array<Color> {
 
     file.close()
 
-    //Log.i("DominantIntegration", lines.size.toString()) //[0].replace(trimmingRegex, "").split(",").toString())
-
     val colors = lines.map { line ->
         val (b, g, r) = line // Inverting colors for mapping shenanigans
             .replace(trimmingRegex, "")
             .split(",")
             .map { it.toInt()}
-        //Log.i("DominantLambda", "red = $r, g = $g, b = $b")
         Color(r, g, b)
-        //Color.Blue
     }
 
     Log.i("DominantList", colors.size.toString())
@@ -54,20 +48,10 @@ fun loadMapping(file: InputStream) : KeyframesSpec<Color> {//Array<Color> {
     //val colors = arrayOf(Color.Red, Color.Blue, Color.Green, Color.Yellow)
 
     val frames = keyframes<Color> {
-        /*
-        durationMillis = colors.size * 1000
+        durationMillis = colors.size * pacingNumber // Magic pacing number
         for ((index, color) in colors.withIndex()) {
-            color at index * 500
+            color at index * pacingNumber
         }
-        */
-        durationMillis = colors.size * 30
-        for ((index, color) in colors.withIndex()) {
-            color at index * 30
-        }
-        //Color.Red at 0
-        //Color.Blue at 500
-        //Color.Green at 1000
-        //Color.Yellow at 1500
     }
     return frames
 }
