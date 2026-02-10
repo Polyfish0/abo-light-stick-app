@@ -28,7 +28,7 @@ import java.util.Locale
 @Composable
 fun MappingBuilder() {
     var songDuration by remember { mutableStateOf("60") }
-    var sliderPosition by remember { mutableFloatStateOf(0f) } // How to pass to slider ?
+    var sliderPosition by remember { mutableFloatStateOf(0f) } // Hoisted state
     var colorPosition by remember { mutableStateOf(Color.White) }
     var mapping by remember { mutableStateOf(ArrayMap<Float, Color>()) }
 
@@ -40,11 +40,19 @@ fun MappingBuilder() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Enter Clip Duration (in seconds)") }
             )
-            ColorPicker()
+            ColorPicker(colorPosition, { colorPosition = it })
             SongSlider(songDuration.toIntOrNull(), sliderPosition, { sliderPosition = it })
             CurrentMapping() // Show gradient once model will be ready
+
             Button(
-                onClick = { Log.i("MappingBuilder", "Implement saving function") },
+                onClick = { mapping[sliderPosition] = colorPosition },
+                modifier = Modifier
+            ) {
+                Text("Add to Mapping")
+            }
+
+            Button(
+                onClick = { SaveMapping(mapping) },
                 modifier = Modifier
             ) {
                 Text("Save")
@@ -54,7 +62,7 @@ fun MappingBuilder() {
 }
 
 @Composable
-fun ColorPicker() {
+fun ColorPicker(colorPosition: Color, onValueChange: (Color) -> Unit) {
 
 }
 
@@ -77,4 +85,9 @@ fun SongSlider(nullableDuration : Int?, sliderPosition: Float, onValueChange: (F
 @Composable
 fun CurrentMapping() {
     // Draw a gradient based on a color list
+}
+
+fun SaveMapping(mapping: ArrayMap<Float, Color>) {
+    Log.i("MappingBuilder", "Implement saving function")
+    // Extract all values (sorted) and save in file
 }

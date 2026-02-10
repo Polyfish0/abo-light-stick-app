@@ -3,7 +3,6 @@ package de.polyfish0.adolightstick.routes.setup
 import android.util.Log
 import android.widget.NumberPicker
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import de.polyfish0.adolightstick.R
 import de.polyfish0.adolightstick.routes.LightStickRoutes
+import de.polyfish0.adolightstick.routes.MappingBuilder
 import de.polyfish0.adolightstick.utils.assetsListTrimmer
 import de.polyfish0.adolightstick.utils.loadMapping
 
@@ -44,8 +44,8 @@ import de.polyfish0.adolightstick.utils.loadMapping
 fun PermissionRequestScreen(navController: NavController) {
     val ctx = LocalContext.current
     val requiredPermissions = rememberMultiplePermissionsState(RequiredPermissions.permissions)
-    val songs : Array<String> = assetsListTrimmer( LocalContext.current.assets.list("Mappings")!!) // Useless func ?
-    var frames = loadMapping(ctx.assets.open("Mappings/Magic")) // Default
+    val songs : Array<String> = assetsListTrimmer( LocalContext.current.assets.list("DefaultMappings")!!) // Useless func ?
+    var frames = loadMapping(ctx.assets.open("DefaultMappings/Magic")) // Default
     var changeColor: Boolean by remember { mutableStateOf(false) }
     val animatedColor: Color by animateColorAsState(targetValue = if (changeColor) Color.Black else Color.White, animationSpec = frames)
     var selectedItem = "Magic"
@@ -95,7 +95,7 @@ fun PermissionRequestScreen(navController: NavController) {
                     Button(
                         onClick = {
                             Log.d("DominantIntegration", selectedItem)
-                            frames = loadMapping(ctx.assets.open("Mappings/$selectedItem"))
+                            frames = loadMapping(ctx.assets.open("DefaultMappings/$selectedItem"))
                             changeColor = !changeColor
                         }
                     ) {
@@ -105,11 +105,14 @@ fun PermissionRequestScreen(navController: NavController) {
                         )
                     }
                 }
+                /*
                 Spacer(modifier = Modifier.weight(1f))
                 Canvas(modifier = Modifier.fillMaxWidth()) {
                     drawCircle(animatedColor, radius = 100.dp.toPx())
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                */
+                MappingBuilder()
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
