@@ -38,12 +38,6 @@ fun loadMapping(file: InputStream) : KeyframesSpec<Color> {//Array<Color> {
     }
 
     Log.i("DominantList", colors.size.toString())
-    //for (line = reader.readLine(), line != null, )
-    /*
-    while (line != null) {
-        line = reader.readLine()
-        rawColor.add(line)
-    }*/
 
     //val colors = arrayOf(Color.Red, Color.Blue, Color.Green, Color.Yellow)
 
