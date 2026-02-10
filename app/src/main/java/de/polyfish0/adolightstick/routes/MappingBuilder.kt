@@ -3,6 +3,7 @@ package de.polyfish0.adolightstick.routes
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -10,13 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.text.isDigitsOnly
 import de.polyfish0.adolightstick.routes.ui.theme.AdoLightStickTheme
 import java.util.Locale
 
@@ -28,12 +30,13 @@ fun MappingBuilder() {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             OutlinedTextField( // Not yet by state
                 value = songDuration,
-                onValueChange = { songDuration = it },
-                label = { Text("Label") }
+                onValueChange = { if (it.isDigitsOnly()) songDuration = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text("Enter Clip Duration (in seconds)") }
             )
             ColorPicker()
-            SongSlider()
-            CurrentMapping()
+            SongSlider(songDuration.toIntOrNull())
+            CurrentMapping() // Show gradient once model will be ready
             Button(
                 onClick = { Log.i("MappingBuilder", "Implement saving function") },
                 modifier = Modifier
@@ -50,8 +53,8 @@ fun ColorPicker() {
 }
 
 @Composable
-fun SongSlider() {
-    val duration = 10
+fun SongSlider(nullableDuration : Int?) {
+    val duration = nullableDuration ?: 60
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     val range = 0.0f..duration.toFloat() // Upper bound must be clip duration in s
 
