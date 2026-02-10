@@ -4,6 +4,9 @@ import android.util.ArrayMap
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
@@ -20,7 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import de.polyfish0.adolightstick.routes.ui.theme.AdoLightStickTheme
 import java.util.Locale
 
@@ -40,12 +47,15 @@ fun MappingBuilder() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Enter Clip Duration (in seconds)") }
             )
-            ColorPicker(colorPosition, { colorPosition = it })
-            SongSlider(songDuration.toIntOrNull(), sliderPosition, { sliderPosition = it })
+            ColorPicker(colorPosition) { colorPosition = it }
+            SongSlider(songDuration.toIntOrNull(), sliderPosition) { sliderPosition = it }
             CurrentMapping() // Show gradient once model will be ready
 
             Button(
-                onClick = { mapping[sliderPosition] = colorPosition },
+                onClick = {
+                    mapping[sliderPosition] = colorPosition
+                    Log.i("UserMapping", "Added $colorPosition at $sliderPosition")
+                          },
                 modifier = Modifier
             ) {
                 Text("Add to Mapping")
@@ -63,7 +73,16 @@ fun MappingBuilder() {
 
 @Composable
 fun ColorPicker(colorPosition: Color, onValueChange: (Color) -> Unit) {
+    val colorPickerController = rememberColorPickerController()
 
+    HsvColorPicker(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
+            .padding(10.dp),
+        controller = colorPickerController,
+        onColorChanged = { onValueChange(it.color) }
+    )
 }
 
 @Composable
