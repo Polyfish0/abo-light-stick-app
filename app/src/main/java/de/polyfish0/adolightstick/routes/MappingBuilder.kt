@@ -1,12 +1,13 @@
 package de.polyfish0.adolightstick.routes
 
-import android.util.ArrayMap
 import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +32,7 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import de.polyfish0.adolightstick.routes.ui.theme.AdoLightStickTheme
 import java.util.Locale
+import java.util.TreeMap
 
 @Preview
 @Composable
@@ -37,7 +40,7 @@ fun MappingBuilder() {
     var songDuration by remember { mutableStateOf("60") }
     var sliderPosition by remember { mutableFloatStateOf(0f) } // Hoisted state
     var colorPosition by remember { mutableStateOf(Color.White) }
-    var mapping by remember { mutableStateOf(ArrayMap<Float, Color>()) }
+    var mapping by remember { mutableStateOf(TreeMap<Float, Color>()) }
 
     AdoLightStickTheme {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -49,7 +52,7 @@ fun MappingBuilder() {
             )
             ColorPicker(colorPosition) { colorPosition = it }
             SongSlider(songDuration.toIntOrNull(), sliderPosition) { sliderPosition = it }
-            CurrentMapping() // Show gradient once model will be ready
+            CurrentMapping(fillHoles(songDuration.toIntOrNull(), mapping)) // Show gradient once model will be ready
 
             Button(
                 onClick = {
@@ -95,18 +98,49 @@ fun SongSlider(nullableDuration : Int?, sliderPosition: Float, onValueChange: (F
             value = sliderPosition,
             valueRange = range,
             steps = (duration - 1) * 10 + 9,
-            onValueChange = { onValueChange(it) },
+            onValueChange = { onValueChange(it) }, // 'it' could be .999999 causing bugs ?
         )
         Text(text = "Current position : ${String.format(Locale.getDefault(), "%.2f", sliderPosition)}")
     }
 }
 
 @Composable
-fun CurrentMapping() {
+fun CurrentMapping(mapping: TreeMap<Float, Color>) {
     // Draw a gradient based on a color list
+    val brush = Brush.horizontalGradient(mapping.values.toList())
+
+    Canvas(
+        modifier = Modifier.height(50.dp).fillMaxWidth(),
+        onDraw = {
+            drawRect(brush)
+        }
+    )
 }
 
-fun SaveMapping(mapping: ArrayMap<Float, Color>) {
+// This function help fill the mapping instead of manually inputing color for each 100 milliseconds
+fun fillHoles(nullableDuration : Int?, mapping: TreeMap<Float, Color>): TreeMap<Float, Color> {
+    val duration = nullableDuration?.toFloat() ?: 60.0f
+    var i = 0.0f // While iterator
+    var currentColor = Color.Black // Color iter
+
+    //for (i in 0.0f..duration step 0.1f)
+    while (i < duration) { //Can't for loop with float range
+        when (mapping[i]) {
+            null -> mapping[i] = currentColor
+            else -> currentColor = mapping[i]!!
+        }
+        i += 0.1f
+    }
+
+    // Penser à la seconde passe
+    // Does it update the map ?
+    return mapping
+}
+
+fun SaveMapping(mapping: TreeMap<Float, Color>) {
+    // Trim values greater than clip len ?
     Log.i("MappingBuilder", "Implement saving function")
     // Extract all values (sorted) and save in file
 }
+
+// Compute fillHole after each addition ?
