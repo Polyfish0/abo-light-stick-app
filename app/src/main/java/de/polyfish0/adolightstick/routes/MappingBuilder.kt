@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
@@ -16,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,15 +32,15 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import de.polyfish0.adolightstick.routes.ui.theme.AdoLightStickTheme
 import java.util.Locale
-import java.util.TreeMap
-
+import java.util.SortedMap
 @Preview
 @Composable
 fun MappingBuilder() {
     var songDuration by remember { mutableStateOf("60") }
     var sliderPosition by remember { mutableFloatStateOf(0f) } // Hoisted state
     var colorPosition by remember { mutableStateOf(Color.White) }
-    var mapping by remember { mutableStateOf(TreeMap<Float, Color>()) }
+    //var mapping by remember { mutableStateOf(TreeMap<Float, Color>()) } // State with collection ?
+    val mapping = remember { mutableStateMapOf<Float, Color>() }
 
     AdoLightStickTheme {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -50,7 +50,7 @@ fun MappingBuilder() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Enter Clip Duration (in seconds)") }
             )
-            ColorPicker(colorPosition) { colorPosition = it }
+            ColorPicker() { colorPosition = it }
             SongSlider(songDuration.toIntOrNull(), sliderPosition) { sliderPosition = it }
             CurrentMapping(fillHoles(songDuration.toIntOrNull(), mapping)) // Show gradient once model will be ready
 
@@ -65,7 +65,7 @@ fun MappingBuilder() {
             }
 
             Button(
-                onClick = { SaveMapping(mapping) },
+                onClick = { SaveMapping(fillHoles(songDuration.toIntOrNull(), mapping)) },
                 modifier = Modifier
             ) {
                 Text("Save")
@@ -75,7 +75,7 @@ fun MappingBuilder() {
 }
 
 @Composable
-fun ColorPicker(colorPosition: Color, onValueChange: (Color) -> Unit) {
+fun ColorPicker(onValueChange: (Color) -> Unit) {
     val colorPickerController = rememberColorPickerController()
 
     HsvColorPicker(
@@ -105,8 +105,9 @@ fun SongSlider(nullableDuration : Int?, sliderPosition: Float, onValueChange: (F
 }
 
 @Composable
-fun CurrentMapping(mapping: TreeMap<Float, Color>) {
+fun CurrentMapping(mapping: SortedMap<Float, Color>) {
     // Draw a gradient based on a color list
+    Log.i("UserMapping", mapping[0.0f].toString())
     val brush = Brush.horizontalGradient(mapping.values.toList())
 
     Canvas(
@@ -118,29 +119,33 @@ fun CurrentMapping(mapping: TreeMap<Float, Color>) {
 }
 
 // This function help fill the mapping instead of manually inputing color for each 100 milliseconds
-fun fillHoles(nullableDuration : Int?, mapping: TreeMap<Float, Color>): TreeMap<Float, Color> {
+fun fillHoles(nullableDuration : Int?, mapping: Map<Float, Color>): SortedMap<Float, Color> {
     val duration = nullableDuration?.toFloat() ?: 60.0f
+    var sorted = mapping.toSortedMap()
     var i = 0.0f // While iterator
     var currentColor = Color.Black // Color iter
 
     //for (i in 0.0f..duration step 0.1f)
     while (i < duration) { //Can't for loop with float range
-        when (mapping[i]) {
-            null -> mapping[i] = currentColor
-            else -> currentColor = mapping[i]!!
+        when (sorted[i]) {
+            null -> sorted[i] = currentColor
+            else -> currentColor = sorted[i]!!
         }
         i += 0.1f
     }
 
     // Penser à la seconde passe
     // Does it update the map ?
-    return mapping
+    return sorted
 }
 
-fun SaveMapping(mapping: TreeMap<Float, Color>) {
+fun SaveMapping(mapping: SortedMap<Float, Color>) {
     // Trim values greater than clip len ?
     Log.i("MappingBuilder", "Implement saving function")
     // Extract all values (sorted) and save in file
 }
 
 // Compute fillHole after each addition ?
+// Save file as .adostick (for using intents and sharing)
+// Repo of .adostick ? Allow people to share freely their mapping, but would need cash to store that.
+// The ado community would pay for it I'm sure (if the app is sexy enough)
