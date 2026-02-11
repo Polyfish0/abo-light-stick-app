@@ -30,6 +30,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import de.polyfish0.adolightstick.models.MappingColor
 import de.polyfish0.adolightstick.routes.ui.theme.AdoLightStickTheme
 import java.util.Locale
 import java.util.SortedMap
@@ -39,8 +40,8 @@ fun MappingBuilder() {
     var songDuration by remember { mutableStateOf("60") }
     var sliderPosition by remember { mutableFloatStateOf(0f) } // Hoisted state
     var colorPosition by remember { mutableStateOf(Color.White) }
-    //var mapping by remember { mutableStateOf(TreeMap<Float, Color>()) } // State with collection ?
-    val mapping = remember { mutableStateMapOf<Float, Color>() }
+
+    val mapping = remember { mutableStateMapOf<Float, MappingColor>() }
 
     AdoLightStickTheme {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -56,7 +57,8 @@ fun MappingBuilder() {
 
             Button(
                 onClick = {
-                    mapping[sliderPosition] = colorPosition
+                    mapping[sliderPosition] = MappingColor(colorPosition, defaultColor = mapping[sliderPosition]?.defaultColor
+                        ?: Color.Black)
                     Log.i("UserMapping", "Added $colorPosition at $sliderPosition")
                           },
                 modifier = Modifier
@@ -65,7 +67,7 @@ fun MappingBuilder() {
             }
 
             Button(
-                onClick = { SaveMapping(fillHoles(songDuration.toIntOrNull(), mapping)) },
+                onClick = { SaveMapping(fillHoles(songDuration.toIntOrNull(), mapping.toSortedMap())) },
                 modifier = Modifier
             ) {
                 Text("Save")
@@ -98,17 +100,17 @@ fun SongSlider(nullableDuration : Int?, sliderPosition: Float, onValueChange: (F
             value = sliderPosition,
             valueRange = range,
             steps = (duration - 1) * 10 + 9,
-            onValueChange = { onValueChange(it) }, // 'it' could be .999999 causing bugs ?
+            onValueChange = { onValueChange(it) }, // 'it' could be .999999 causing bugs. Slider can't have Int as value
         )
         Text(text = "Current position : ${String.format(Locale.getDefault(), "%.2f", sliderPosition)}")
     }
 }
 
 @Composable
-fun CurrentMapping(mapping: SortedMap<Float, Color>) {
+fun CurrentMapping(mapping: SortedMap<Float, MappingColor>) {
     // Draw a gradient based on a color list
-    Log.i("UserMapping", mapping[0.0f].toString())
-    val brush = Brush.horizontalGradient(mapping.values.toList())
+    Log.i("UserMapping", "Rebuild impression")
+    val brush = Brush.horizontalGradient(mapping.values.map { it.manualColor ?: it.defaultColor})
 
     Canvas(
         modifier = Modifier.height(50.dp).fillMaxWidth(),
@@ -119,19 +121,20 @@ fun CurrentMapping(mapping: SortedMap<Float, Color>) {
 }
 
 // This function help fill the mapping instead of manually inputing color for each 100 milliseconds
-fun fillHoles(nullableDuration : Int?, mapping: Map<Float, Color>): SortedMap<Float, Color> {
-    val duration = nullableDuration?.toFloat() ?: 60.0f
+fun fillHoles(nullableDuration : Int?, mapping: Map<Float, MappingColor>): SortedMap<Float, MappingColor> {
+    val durationInt = (nullableDuration ?: 60) * 10
     var sorted = mapping.toSortedMap()
-    var i = 0.0f // While iterator
+    var sortedIndex: Float
     var currentColor = Color.Black // Color iter
 
-    //for (i in 0.0f..duration step 0.1f)
-    while (i < duration) { //Can't for loop with float range
-        when (sorted[i]) {
-            null -> sorted[i] = currentColor
-            else -> currentColor = sorted[i]!!
+    Log.i("MappingBuilder", "fillHoles Called")
+
+    for (i in 0..durationInt) {
+        sortedIndex = i / 10.toFloat()
+        when (sorted[sortedIndex]) {
+            null -> sorted[sortedIndex] = MappingColor(defaultColor = currentColor)
+            else -> currentColor = sorted[sortedIndex]!!.manualColor!! // Replace current color
         }
-        i += 0.1f
     }
 
     // Penser à la seconde passe
@@ -139,7 +142,7 @@ fun fillHoles(nullableDuration : Int?, mapping: Map<Float, Color>): SortedMap<Fl
     return sorted
 }
 
-fun SaveMapping(mapping: SortedMap<Float, Color>) {
+fun SaveMapping(mapping: SortedMap<Float, MappingColor>) {
     // Trim values greater than clip len ?
     Log.i("MappingBuilder", "Implement saving function")
     // Extract all values (sorted) and save in file
