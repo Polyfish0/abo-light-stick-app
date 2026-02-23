@@ -34,12 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
-import de.polyfish0.adolightstick.models.MappingColor
 import de.polyfish0.adolightstick.routes.ui.theme.AdoLightStickTheme
 import de.polyfish0.adolightstick.utils.Either
 import java.util.Locale
 import java.util.SortedMap
-import java.util.stream.Collectors.mapping
 import kotlin.collections.set
 
 @Preview
@@ -50,7 +48,7 @@ fun MappingBuilder() {
     var colorPosition by remember { mutableStateOf(Color.White) }
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    val mapping = remember { mutableStateMapOf<Float, MappingColor>() }
+    val mapping = remember { mutableStateMapOf<Float, Color>() }
 
     AdoLightStickTheme {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -60,24 +58,13 @@ fun MappingBuilder() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Enter Clip Duration (in seconds)") }
             )
-            ColorPicker() { colorPosition = it }
+            ColorPicker { colorPosition = it }
             Tabs(selectedTab) {selectedTab = it}
-            FrameSlider(songDuration.toIntOrNull(), sliderPosition) { sliderPosition = it }
+            SliderWrapper(selectedTab, songDuration.toIntOrNull(), colorPosition, mapping)
             CurrentMapping(fillHoles(songDuration.toIntOrNull(), mapping)) // Show gradient once model will be ready
 
             Button(
-                onClick = {
-                    mapping[sliderPosition] = MappingColor(colorPosition, defaultColor = mapping[sliderPosition]?.defaultColor
-                        ?: Color.Black)
-                    Log.i("UserMapping", "Added $colorPosition at $sliderPosition")
-                          },
-                modifier = Modifier
-            ) {
-                Text("Add to Mapping")
-            }
-
-            Button(
-                onClick = { SaveMapping(fillHoles(songDuration.toIntOrNull(), mapping.toSortedMap())) },
+                onClick = { saveMapping(fillHoles(songDuration.toIntOrNull(), mapping.toSortedMap())) },
                 modifier = Modifier
             ) {
                 Text("Save")
@@ -115,15 +102,14 @@ fun ColorPicker(onValueChange: (Color) -> Unit) {
     )
 }
 
-// Prepare a Slider wrapper taking the selected and color as arg.
-// Wrapper should contain the slider and the add button
+// Prepare a Slider wrapper taking the selectedTab and color as arg.
 @Composable
-fun SliderWrapper(selected: Int, nullableDuration: Int?, color: Color, mapping: MutableMap<Float, MappingColor>) {
+fun SliderWrapper(selected: Int, nullableDuration: Int?, color: Color, mapping: MutableMap<Float, Color>) {
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sliderRange by remember { mutableStateOf(0f..duration.toFloat()) }
 
     when (selected) {
-        0 -> {IntervalSlider(nullableDuration, sliderRange) { sliderRange = it}; AddToMappingButton(mapping, color, Either.Right(sliderRange))}
+        0 -> {IntervalSlider(nullableDuration) { sliderRange = it}; AddToMappingButton(mapping, color, Either.Right(sliderRange))}
         1 -> {FrameSlider(nullableDuration, sliderPosition) { sliderPosition = it }; AddToMappingButton(mapping, color, Either.Left(sliderPosition))}
     }
 }
@@ -145,9 +131,7 @@ fun FrameSlider(nullableDuration : Int?, sliderPosition: Float, onValueChange: (
 }
 
 @Composable
-fun IntervalSlider(nullableDuration: Int?, sliderRange: ClosedFloatingPointRange<Float>, onValueChange: (ClosedFloatingPointRange<Float>) -> Unit) { // State Hoisting
-    // Refactor those for transforming models here ?
-    // Replace sliderPos and onValueChange by Model editing.
+fun IntervalSlider(nullableDuration: Int?, onValueChange: (ClosedFloatingPointRange<Float>) -> Unit) { // State Hoisting
     val duration = nullableDuration ?: 60
     val range = 0.0f..duration.toFloat() // Upper bound must be clip duration in s
     var sliderPosition by remember { mutableStateOf(0f..duration.toFloat()) }
@@ -158,23 +142,21 @@ fun IntervalSlider(nullableDuration: Int?, sliderRange: ClosedFloatingPointRange
             valueRange = range,
             steps = (duration - 1) * 10 + 9,
             onValueChange = { sliderPosition = it }, // 'it' could be .999999 causing bugs. Slider can't have Int as value
+            onValueChangeFinished = { onValueChange(sliderPosition) }
         )
-        Text(text = "Current position : ${String.format(Locale.getDefault(), "%.2f", sliderPosition)}")
+        Text(text = "Current position : ${String.format(Locale.getDefault(), "%.2f", sliderPosition.start)} " +
+                "to ${String.format(Locale.getDefault(), "%.2f", sliderPosition.endInclusive)}")
     }
 }
 
 @Composable
-fun AddToMappingButton(mapping: MutableMap<Float, MappingColor>, colorPosition: Color, sliderPosition: Either<Float, ClosedFloatingPointRange<Float>>) {
-    // Replace Slider Pos by Either ?
-
+fun AddToMappingButton(mapping: MutableMap<Float, Color>, colorPosition: Color, sliderPosition: Either<Float, ClosedFloatingPointRange<Float>>) {
     Button(
         onClick = {
             when (sliderPosition) {
-                is Either.Left -> mapping[sliderPosition.value] = MappingColor(colorPosition, defaultColor = mapping[sliderPosition.value]?.defaultColor
-                ?: Color.Black) // Delete the whole MappingColor model
-                is Either.Right -> TODO() // Interval
+                is Either.Left -> mapping[sliderPosition.value] = colorPosition
+                is Either.Right -> colorInterval(mapping, colorPosition, sliderPosition.value) // Interval
             }
-
             Log.i("UserMapping", "Added $colorPosition at $sliderPosition")
         }
     ) {
@@ -183,10 +165,9 @@ fun AddToMappingButton(mapping: MutableMap<Float, MappingColor>, colorPosition: 
 }
 
 @Composable
-fun CurrentMapping(mapping: SortedMap<Float, MappingColor>) {
-    // Draw a gradient based on a color list
+fun CurrentMapping(mapping: SortedMap<Float, Color>) {
     Log.i("UserMapping", "Rebuild impression")
-    val brush = Brush.horizontalGradient(mapping.values.map { it.manualColor ?: it.defaultColor})
+    val brush = Brush.horizontalGradient(mapping.values.map { it })
 
     Canvas(
         modifier = Modifier.height(50.dp).fillMaxWidth(),
@@ -196,31 +177,39 @@ fun CurrentMapping(mapping: SortedMap<Float, MappingColor>) {
     )
 }
 
-// This function help fill the mapping instead of manually inputing color for each 100 milliseconds
-fun fillHoles(nullableDuration : Int?, mapping: Map<Float, MappingColor>): SortedMap<Float, MappingColor> {
+fun colorInterval(mapping: MutableMap<Float, Color>, color: Color, sliderRange: ClosedFloatingPointRange<Float>) {
+    val startInt = (sliderRange.start * 10).toInt()
+    val endInt = (sliderRange.endInclusive * 10).toInt()
+    var sortedIndex: Float
+
+    Log.i("MappingBuilder", "colorInterval Called between ${sliderRange.start} and ${sliderRange.endInclusive}")
+    Log.i("MappingBuilder", "colorInterval Called between $startInt and $endInt")
+
+    for (i in startInt..endInt) {
+        sortedIndex = i / 10.toFloat() // FloatingPoint Shenanigans
+        when (mapping[sortedIndex]) {
+            null -> mapping[sortedIndex] = color
+        }
+    }
+}
+
+fun fillHoles(nullableDuration : Int?, mapping: Map<Float, Color>): SortedMap<Float, Color> {
     val durationInt = (nullableDuration ?: 60) * 10
     var sorted = mapping.toSortedMap()
     var sortedIndex: Float
-    var currentColor = Color.Black // Color iter
 
     Log.i("MappingBuilder", "fillHoles Called")
 
     for (i in 0..durationInt) {
         sortedIndex = i / 10.toFloat()
         when (sorted[sortedIndex]) {
-            null -> sorted[sortedIndex] = MappingColor(defaultColor = currentColor)
-            else -> currentColor = sorted[sortedIndex]!!.manualColor!! // Replace current color
+            null -> sorted[sortedIndex] = Color.Black
         }
     }
-
-    // Penser à la seconde passe
-    // Idée de base foireuse ? Comment je determine jusqu'ou j'écrase ?
-    // Ok fuck filling holes, fuck the model, instead use double slider. One for frame and one for interval.
-    // Does it update the map ?
     return sorted
 }
 
-fun SaveMapping(mapping: SortedMap<Float, MappingColor>) {
+fun saveMapping(mapping: SortedMap<Float, Color>) {
     // Trim values greater than clip len ?
     Log.i("MappingBuilder", "Implement saving function")
     // Extract all values (sorted) and save in file
@@ -228,5 +217,4 @@ fun SaveMapping(mapping: SortedMap<Float, MappingColor>) {
 
 // Compute fillHole after each addition ?
 // Save file as .adostick (for using intents and sharing)
-// Repo of .adostick ? Allow people to share freely their mapping, but would need cash to store that.
-// The ado community would pay for it I'm sure (if the app is sexy enough)
+// Repo of .adostick ? Allow people to share freely their mapping ?
