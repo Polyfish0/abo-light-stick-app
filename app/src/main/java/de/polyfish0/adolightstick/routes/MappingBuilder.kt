@@ -44,7 +44,6 @@ import kotlin.collections.set
 @Composable
 fun MappingBuilder() {
     var songDuration by remember { mutableStateOf("60") }
-    var sliderPosition by remember { mutableFloatStateOf(0f) } // Hoisted states
     var colorPosition by remember { mutableStateOf(Color.White) }
     var selectedTab by remember { mutableIntStateOf(0) }
 
