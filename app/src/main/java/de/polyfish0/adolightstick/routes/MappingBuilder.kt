@@ -154,10 +154,9 @@ fun AddToMappingButton(mapping: MutableMap<Int, Color>, colorPosition: Color, sl
     Button(
         onClick = {
             when (sliderPosition) {
-                is Either.Left -> mapping[(sliderPosition.value * 10).roundToInt()] = colorPosition
+                is Either.Left -> { Log.i("UserMapping", "Raw ${sliderPosition.value}, model: ${(sliderPosition.value * 10).roundToInt()}"); mapping[((sliderPosition.value * 10).roundToInt())] = colorPosition }
                 is Either.Right -> colorInterval(mapping, colorPosition, sliderPosition.value) // Interval
             }
-            Log.i("UserMapping", "Added $colorPosition at $sliderPosition")
         }
     ) {
         Text("Add to Mapping")
@@ -169,6 +168,9 @@ fun CurrentMapping(mapping: SortedMap<Int, Color>) {
     Log.i("UserMapping", "Rebuild impression")
     val brush = Brush.horizontalGradient(mapping.values.map { it })
 
+    // Debug map. Test frame 26,3 ?
+    mapping.map { Log.i("UserMapping", "${it.key} : ${it.value}") }
+
     Canvas(
         modifier = Modifier.height(50.dp).fillMaxWidth(),
         onDraw = {
@@ -178,16 +180,15 @@ fun CurrentMapping(mapping: SortedMap<Int, Color>) {
 }
 
 fun colorInterval(mapping: MutableMap<Int, Color>, color: Color, sliderRange: ClosedFloatingPointRange<Float>) {
-    val startInt = (sliderRange.start * 10).toInt()
-    val endInt = (sliderRange.endInclusive * 10).toInt()
+    val startInt = (sliderRange.start * 10).roundToInt()
+    val endInt = (sliderRange.endInclusive * 10).roundToInt()
     //var sortedIndex: Float
 
     Log.i("MappingBuilder", "colorInterval Called between ${sliderRange.start} and ${sliderRange.endInclusive}")
     Log.i("MappingBuilder", "colorInterval Called between $startInt and $endInt")
 
     for (i in startInt..endInt) {
-        //sortedIndex = i / 10.toFloat() // FloatingPoint Shenanigans
-        when (mapping[i]) {
+        when (mapping[i]) { // Do not stomp already existing colors
             null -> mapping[i] = color
         }
     }
