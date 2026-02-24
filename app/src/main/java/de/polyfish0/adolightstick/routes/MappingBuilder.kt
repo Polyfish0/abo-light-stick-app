@@ -39,6 +39,7 @@ import de.polyfish0.adolightstick.utils.Either
 import java.util.Locale
 import java.util.SortedMap
 import kotlin.collections.set
+import kotlin.math.roundToInt
 
 @Preview
 @Composable
@@ -47,7 +48,7 @@ fun MappingBuilder() {
     var colorPosition by remember { mutableStateOf(Color.White) }
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    val mapping = remember { mutableStateMapOf<Float, Color>() }
+    val mapping = remember { mutableStateMapOf<Int, Color>() }
 
     AdoLightStickTheme {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -103,7 +104,7 @@ fun ColorPicker(onValueChange: (Color) -> Unit) {
 
 // Prepare a Slider wrapper taking the selectedTab and color as arg.
 @Composable
-fun SliderWrapper(selected: Int, nullableDuration: Int?, color: Color, mapping: MutableMap<Float, Color>) {
+fun SliderWrapper(selected: Int, nullableDuration: Int?, color: Color, mapping: MutableMap<Int, Color>) {
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sliderRange by remember { mutableStateOf(0f..duration.toFloat()) }
 
@@ -149,11 +150,11 @@ fun IntervalSlider(nullableDuration: Int?, onValueChange: (ClosedFloatingPointRa
 }
 
 @Composable
-fun AddToMappingButton(mapping: MutableMap<Float, Color>, colorPosition: Color, sliderPosition: Either<Float, ClosedFloatingPointRange<Float>>) {
+fun AddToMappingButton(mapping: MutableMap<Int, Color>, colorPosition: Color, sliderPosition: Either<Float, ClosedFloatingPointRange<Float>>) {
     Button(
         onClick = {
             when (sliderPosition) {
-                is Either.Left -> mapping[sliderPosition.value] = colorPosition
+                is Either.Left -> mapping[(sliderPosition.value * 10).roundToInt()] = colorPosition
                 is Either.Right -> colorInterval(mapping, colorPosition, sliderPosition.value) // Interval
             }
             Log.i("UserMapping", "Added $colorPosition at $sliderPosition")
@@ -164,7 +165,7 @@ fun AddToMappingButton(mapping: MutableMap<Float, Color>, colorPosition: Color, 
 }
 
 @Composable
-fun CurrentMapping(mapping: SortedMap<Float, Color>) {
+fun CurrentMapping(mapping: SortedMap<Int, Color>) {
     Log.i("UserMapping", "Rebuild impression")
     val brush = Brush.horizontalGradient(mapping.values.map { it })
 
@@ -176,39 +177,37 @@ fun CurrentMapping(mapping: SortedMap<Float, Color>) {
     )
 }
 
-fun colorInterval(mapping: MutableMap<Float, Color>, color: Color, sliderRange: ClosedFloatingPointRange<Float>) {
+fun colorInterval(mapping: MutableMap<Int, Color>, color: Color, sliderRange: ClosedFloatingPointRange<Float>) {
     val startInt = (sliderRange.start * 10).toInt()
     val endInt = (sliderRange.endInclusive * 10).toInt()
-    var sortedIndex: Float
+    //var sortedIndex: Float
 
     Log.i("MappingBuilder", "colorInterval Called between ${sliderRange.start} and ${sliderRange.endInclusive}")
     Log.i("MappingBuilder", "colorInterval Called between $startInt and $endInt")
 
     for (i in startInt..endInt) {
-        sortedIndex = i / 10.toFloat() // FloatingPoint Shenanigans
-        when (mapping[sortedIndex]) {
-            null -> mapping[sortedIndex] = color
+        //sortedIndex = i / 10.toFloat() // FloatingPoint Shenanigans
+        when (mapping[i]) {
+            null -> mapping[i] = color
         }
     }
 }
 
-fun fillHoles(nullableDuration : Int?, mapping: Map<Float, Color>): SortedMap<Float, Color> {
+fun fillHoles(nullableDuration : Int?, mapping: Map<Int, Color>): SortedMap<Int, Color> {
     val durationInt = (nullableDuration ?: 60) * 10
     var sorted = mapping.toSortedMap()
-    var sortedIndex: Float
 
     Log.i("MappingBuilder", "fillHoles Called")
 
     for (i in 0..durationInt) {
-        sortedIndex = i / 10.toFloat()
-        when (sorted[sortedIndex]) {
-            null -> sorted[sortedIndex] = Color.Black
+        when (sorted[i]) {
+            null -> sorted[i] = Color.Black
         }
     }
     return sorted
 }
 
-fun saveMapping(mapping: SortedMap<Float, Color>) {
+fun saveMapping(mapping: SortedMap<Int, Color>) {
     // Trim values greater than clip len ?
     Log.i("MappingBuilder", "Implement saving function")
     // Extract all values (sorted) and save in file
