@@ -64,7 +64,7 @@ fun MappingBuilder() {
             CurrentMapping(fillHoles(songDuration.toIntOrNull(), mapping)) // Show gradient once model will be ready
 
             Button(
-                onClick = { saveMapping(fillHoles(songDuration.toIntOrNull(), mapping.toSortedMap())) },
+                onClick = { saveMapping(songDuration.toIntOrNull(), mapping) },
                 modifier = Modifier
             ) {
                 Text("Save")
@@ -169,7 +169,7 @@ fun CurrentMapping(mapping: SortedMap<Int, Color>) {
     val brush = Brush.horizontalGradient(mapping.values.map { it })
 
     // Debug map. Test frame 26,3 ?
-    mapping.map { Log.i("UserMapping", "${it.key} : ${it.value}") }
+    mapping.map { if (it.value != Color.Black) Log.i("UserMapping", "${it.key} : ${it.value}") }
 
     Canvas(
         modifier = Modifier.height(50.dp).fillMaxWidth(),
@@ -208,10 +208,15 @@ fun fillHoles(nullableDuration : Int?, mapping: Map<Int, Color>): SortedMap<Int,
     return sorted
 }
 
-fun saveMapping(mapping: SortedMap<Int, Color>) {
-    // Trim values greater than clip len ?
+fun saveMapping(nullableDuration: Int?, mapping: MutableMap<Int, Color>) {
+    //val sorted = fillHoles(songDuration, mapping)
+    val mapMaxSize = (nullableDuration ?: 60) * 10 // Trim values greater than clip len
+
+    mapping.entries.removeIf { it.key > mapMaxSize }
+
     Log.i("MappingBuilder", "Implement saving function")
     // Extract all values (sorted) and save in file
+    // Pop up window asking for save name.
 }
 
 // Compute fillHole after each addition ?
